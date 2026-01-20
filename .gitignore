@@ -1,0 +1,19 @@
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Python
+venv/
+*.pyc
+__pycache__/
+
+# OS
+.DS_Store
+
+# Local secrets
+# profiles.yml (Standard dbt practice is to keep this outside the repo or ignore it)
+# I will include it in gitignore for safety, but if the user wants to push it, 
+# they can comment this line.
+profiles.yml
+.user.yml

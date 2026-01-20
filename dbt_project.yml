@@ -5,6 +5,9 @@ version: "1.0.0"
 
 profile: "dbt_101_profile"
 
+on-run-end:
+  - "{{ log_run_results(results) }}"
+
 model-paths: ["models"]
 analysis-paths: ["analyses"]
 test-paths: ["data-tests"]
@@ -27,8 +30,12 @@ seeds:
       +enabled: "{{ var('load_source_data', false) }}"
 
 models:
-  jaffle_shop:
+  dbt_101:
     staging:
       +materialized: view
+      +schema: stg
     marts:
       +materialized: table
+    ctl:
+      +materialized: table
+      +schema: ctl

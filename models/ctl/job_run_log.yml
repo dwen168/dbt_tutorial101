@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: job_run_log
+    description: "Control table to track ETL job execution history"
+    columns:
+      - name: job_run_id
+        description: "Unique identifier for each job run"
+        tests:
+          - unique
+          - not_null
+      - name: invocation_id
+        description: "dbt invocation ID for this run"
+      - name: run_started_at
+        description: "Timestamp when the dbt run started"
+        tests:
+          - not_null
+      - name: logged_at
+        description: "Timestamp when this record was created"
+      - name: target_name
+        description: "Target environment (dev, prod, etc.)"
+      - name: target_schema
+        description: "Default schema for this run"
+      - name: job_type
+        description: "Type of job (dbt run, dbt test, etc.)"
+      - name: job_name
+        description: "Specific job or model name"
+      - name: status
+        description: "Job status (success, failure, running)"
+      - name: error_message
+        description: "Error message if job failed"
+      - name: run_duration_seconds
+        description: "Duration of the job run in seconds"

@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: job_run_history
+    description: "View of job run history with additional analytics fields"
+    columns:
+      - name: job_run_id
+        description: "Unique identifier for each job run"
+      - name: run_date
+        description: "Date of the job run"
+      - name: is_failure
+        description: "Flag indicating if the job failed (1) or not (0)"
+      - name: is_success
+        description: "Flag indicating if the job succeeded (1) or not (0)"

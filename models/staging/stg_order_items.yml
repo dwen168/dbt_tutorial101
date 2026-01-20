@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+    - name: raw
+      description: "Raw data source"
+      schema: raw
+      tables:
+        - name: raw_items
+          description: "Raw order items data"
+        
+models:
+    - name: stg_order_items
+      description: "Staging view for order items data"
+      schema: stg
+      columns:
+        - name: order_item_id
+          description: "Unique identifier for order item"
+          tests:
+            - unique
+            - not_null
+        - name: order_id
+          description: "Unique identifier for order"
+          tests:
+            - not_null
+            - relationships:
+                to: ref('stg_orders')
+                field: order_id
+        

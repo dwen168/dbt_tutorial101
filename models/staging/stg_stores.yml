@@ -1,0 +1,57 @@
+sources:
+    - name: raw
+      description: "Raw data source"
+      schema: raw
+      tables:
+        - name: raw_stores
+          description: "Raw store data"
+
+
+models:
+    - name: stg_stores
+      description: "Staging view for store data"
+      schema: stg
+      columns:
+        - name: store_id
+          description: "Unique identifier for store"
+          tests:
+            - unique
+            - not_null
+        - name: store_location
+          description: "Location of the store"
+          tests:
+            - textual
+        - name: location_tax_rate
+          description: "Tax rate for the store location"
+          tests:
+            - not_null
+        - name: store_opened_date
+          description: "Date the store opened"
+          tests:
+            - not_null
+
+unit_tests:
+    - name: test_does_trunc_function_work
+      description: "Test does trunc function work"
+      model: stg_stores
+      given:
+      - input: source('raw', 'raw_stores')
+        rows:
+          - id: 1
+            name: "Vice City"
+            tax_rate: 0.2
+            opened_at: "2016-09-01T00:00:00"
+          - id: 2
+            name: "San Andreas"
+            tax_rate: 0.1
+            opened_at: "2079-10-27T23:59:59.9999"
+      expect:
+        rows:
+          - store_id: 1
+            store_location: "Vice City"
+            location_tax_rate: 0.2
+            store_opened_date: "2016-09-01"
+          - store_id: 2
+            store_location: "San Andreas"
+            location_tax_rate: 0.1
+            store_opened_date: "2079-10-27"

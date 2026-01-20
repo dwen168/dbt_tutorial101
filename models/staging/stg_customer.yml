@@ -1,0 +1,25 @@
+version: 2
+
+models:
+    - name: stg_customer
+      description: "Staging view for customer data"
+      schema: stg
+      columns:
+        - name: customer_id
+          description: "Unique identifier for customer"
+          tests:
+            - unique
+            - not_null
+        - name: customer_name
+          description: "Name of the customer"
+          tests:
+            - textual
+
+
+sources:
+    - name: raw
+      description: "Raw data source"
+      schema: raw
+      tables:
+        - name: raw_customers
+          description: "Raw customer data"
