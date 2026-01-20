@@ -1,8 +1,18 @@
-{{ config( materialized='table' ) }}
+{{ config(
+    materialized='incremental',
+    unique_key='order_id'
+) }}
 
-WITH orders as ( select * from {{ ref('stg_orders') }} ),
+WITH orders as ( 
+    select * from {{ ref('stg_orders') }} 
+    {% if is_incremental() %}
+    -- Only process orders newer than the latest order in this table
+    where ordered_at > (select max(ordered_at) from {{ this }})
+    {% endif %}
+),
 
 -- Aggregating item metrics from fact_order_items
+-- Since we filtered orders above, this join will only pick up relevant item summaries
 
 order_items_summary as (
     select
