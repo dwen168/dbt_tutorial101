@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: fact_orders
+    description: "Fact table for orders including aggregated item metrics"
+    schema: marts
+    columns:
+      - name: order_id
+        description: "Unique identifier for each order"
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Unique identifier for each customer"
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customer')
+                field: customer_id
+
+semantic_models:
+  - name: semantic_orders
+    description: "Semantic model for order analysis"
+    model: ref('fact_orders')
+    defaults:
+      agg_time_dimension: ordered_at
+    
+    entities:
+      - name: order_id
+        type: primary
+      - name: customer_id
+        type: foreign
+      - name: store_id
+        type: foreign
+
+    measures:
+      - name: order_total_amount
+        expr: order_total
+        agg: sum
+      - name: orders_count
+        expr: order_id
+        agg: count_distinct
+      - name: total_supply_cost
+        expr: order_supply_cost
+        agg: sum
+
+    dimensions:
+      - name: ordered_at
+        type: time
+        type_params:
+          time_granularity: day
+
+metrics:
+  - name: revenue
+    label: "Revenue"
+    description: "Total Revenue from orders"
+    type: simple
+    type_params:
+      measure: order_total_amount
+  
+  - name: order_volume
+    label: "Order Volume"
+    description: "Count of distinct orders"
+    type: simple
+    type_params:
+      measure: orders_count
+
+  - name: profit_margin
+    label: "Profit Margin (Est)"
+    description: "Revenue minus supply cost"
+    type: derived
+    type_params:
+      expr: revenue - supply_cost
+      metrics:
+        - name: revenue
+        - name: total_supply_cost
+          alias: supply_cost
+
+  - name: total_supply_cost
+    label: "Supply Cost"
+    type: simple
+    type_params:
+      measure: total_supply_cost
+
+saved_queries:
+  - name: daily_revenue_summary
+    label: "Daily Revenue Summary"
+    description: "Key metrics aggregated by day"
+    query_params:
+      metrics:
+        - revenue
+        - order_volume
+      group_by:
+        - "Dimension('order_id__ordered_at')"

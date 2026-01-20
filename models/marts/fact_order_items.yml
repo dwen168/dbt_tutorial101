@@ -1,0 +1,17 @@
+models:
+    - name: fact_order_items
+      description: "Fact table for order items"
+      schema: marts
+      columns:
+        - name: order_item_id
+          description: "Unique identifier for each order item"
+          tests:
+            - unique
+            - not_null
+        - name: order_id
+          description: "Unique identifier for each order"
+          tests:
+            - relationships:
+                arguments:
+                  to: ref('fact_orders')
+                  field: order_id

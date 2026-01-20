@@ -10,6 +10,7 @@ renamed as (
         id as order_id,
         store_id as store_id,
         customer as customer_id,
+        ordered_at as ordered_at,
         subtotal as subtotal_cents,
         tax_paid as tax_paid_cents,
         order_total as order_total_cents
@@ -21,6 +22,7 @@ final as (
         order_id,
         store_id,
         customer_id,
+        ordered_at,
         subtotal_cents,
         tax_paid_cents,
         order_total_cents,

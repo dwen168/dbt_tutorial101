@@ -1,32 +1,31 @@
 {{ config( materialized='view', schema='ctl' ) }}
 
--- View to analyze job run history with local time conversion (AEST/AEDT)
+-- Analytics view for job history with local time conversion
 select
     job_run_id,
-    run_started_at as run_started_at_utc,
-    run_completed_at as run_completed_at_utc,
+    run_started_at at time zone 'UTC' at time zone 'Australia/Sydney' as run_started_at_local,
+    job_name,
+    job_type,
+    status,
 
--- Convert to Australian Eastern Time
--- Using 'Australia/Sydney' automatically handles AEST and AEDT (Daylight Savings)
-run_started_at at time zone 'UTC' at time zone 'Australia/Sydney' as run_started_at_local,
-run_completed_at at time zone 'UTC' at time zone 'Australia/Sydney' as run_completed_at_local,
-job_name,
-job_type,
-status,
-error_message,
-run_duration_seconds,
-invocation_id,
-target_name,
+-- Metrics
+rows_affected as incremental_output,
+    target_rows as total_output,
 
--- Calculate run date in local time
-date (
-    run_started_at at time zone 'UTC' at time zone 'Australia/Sydney'
-) as run_date_local,
+    case 
+        when job_type = 'seed' then 'FULL LOAD (SEED)'
+        when is_full_refresh = true then 'FULL REFRESH'
+        when materialization_type = 'incremental' then 'INCREMENTAL LOAD'
+        when materialization_type = 'table' then 'FULL LOAD (TABLE)'
+        when materialization_type = 'view' then 'VIEW (VIRTUAL)'
+        else upper(materialization_type)
+    end as load_strategy,
 
--- Flag for failures
-case when status in ('failure', 'error', 'fail') then 1 else 0 end as is_failure,
-    -- Flag for success
-    case when status in ('success', 'pass') then 1 else 0 end as is_success
+    destination_table,
+    adapter_response,
+    error_message,
+    run_duration_seconds as duration,
+    invocation_id
 from {{ ref('job_run_log') }}
 where job_run_id is not null
 order by run_started_at desc
