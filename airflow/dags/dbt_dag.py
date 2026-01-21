@@ -51,19 +51,45 @@ with DAG(
         vars={"load_source_data": True}
     )
 
-    run_and_test = DbtTaskGroup(
-        group_id="dbt_run_and_test",
+    # 1. Utility (ctl models like job_run_log)
+    utility = DbtTaskGroup(
+        group_id="dbt_utility",
+        project_config=project_config,
+        profile_config=profile_config,
+        execution_config=execution_config,
+        render_config=RenderConfig(
+            select=["path:models/ctl"]
+        )
+    )
+
+    # 2. Staging models
+    staging = DbtTaskGroup(
+        group_id="dbt_staging",
         project_config=project_config,
         profile_config=profile_config,
         execution_config=execution_config,
         operator_args={
             "vars": {"load_source_data": True}
         },
-        # Run all models first, then run tests. 
-        # This prevents "relation does not exist" errors in tests that ref downstream models.
         render_config=RenderConfig(
+            select=["path:models/staging"],
             test_behavior=TestBehavior.AFTER_ALL
         )
     )
 
-    seed_step >> run_and_test
+    # 3. Marts models
+    marts = DbtTaskGroup(
+        group_id="dbt_marts",
+        project_config=project_config,
+        profile_config=profile_config,
+        execution_config=execution_config,
+        operator_args={
+            "vars": {"load_source_data": True}
+        },
+        render_config=RenderConfig(
+            select=["path:models/marts"],
+            test_behavior=TestBehavior.AFTER_ALL
+        )
+    )
+
+    seed_step >> utility >> staging >> marts
