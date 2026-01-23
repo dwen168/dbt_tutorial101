@@ -29,6 +29,10 @@ RUN pip install --no-cache-dir \
 # Create dbt project directory
 USER root
 RUN mkdir -p /opt/airflow/dbt_project && chown airflow: /opt/airflow/dbt_project
+
+# Create a symlink for dbt so it can be accessed globally (fixes PermissionError)
+RUN ln -sf /home/airflow/dbt_venv/bin/dbt /usr/local/bin/dbt
+
 USER airflow
 
 WORKDIR /opt/airflow

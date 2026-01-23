@@ -39,3 +39,7 @@ models:
     ctl:
       +materialized: table
       +schema: ctl
+
+
+flags:
+  indirect_selection: cautious

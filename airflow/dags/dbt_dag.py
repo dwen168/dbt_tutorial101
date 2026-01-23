@@ -34,8 +34,10 @@ project_config = ProjectConfig(
     dbt_vars={"load_source_data": True},
 )
 
+# This is the original monolithic DAG, kept for testing purposes.
+# Renamed dag_id to avoid confusion with the split DAGs.
 with DAG(
-    dag_id="dbt_tutorial_dag",
+    dag_id="dbt_tutorial_dag_test",
     start_date=datetime(2024, 1, 1),
     schedule_interval="@daily",
     catchup=False,
@@ -47,7 +49,6 @@ with DAG(
         project_config=project_config,
         profile_config=profile_config,
         execution_config=execution_config,
-        install_deps=True,
         vars={"load_source_data": True}
     )
 
@@ -73,7 +74,7 @@ with DAG(
         },
         render_config=RenderConfig(
             select=["path:models/staging"],
-            test_behavior=TestBehavior.AFTER_ALL
+            test_behavior=TestBehavior.AFTER_EACH
         )
     )
 
@@ -92,4 +93,4 @@ with DAG(
         )
     )
 
-    seed_step >> utility >> staging >> marts
+    utility >> seed_step >> staging >> marts
