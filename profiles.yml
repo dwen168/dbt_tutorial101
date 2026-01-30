@@ -1,9 +1,22 @@
 dbt_101_profile:
   target: dev
   outputs:
+    # Local development environment - runs dbt from your macOS
     dev:
       type: postgres
       host: localhost
+      user: postgres
+      password: mysecretpassword
+      port: 5432
+      dbname: postgres
+      schema: raw
+      threads: 4
+      keepalives_idle: 0
+    
+    # Docker environment - runs dbt from Airflow containers
+    docker:
+      type: postgres
+      host: host.docker.internal
       user: postgres
       password: mysecretpassword
       port: 5432
